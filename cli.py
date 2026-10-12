@@ -1,3 +1,33 @@
+# =====================================================================
+# main.py  -  Todo app, SECTION 15 version
+# Python Mega Course (Udemy). Section 15: Built-in Tools & Version
+# Control (Standard Modules, Git)
+#
+# In section 15 this file is main.py. (In 156 it is renamed to cli.py,
+# because a GUI frontend, gui.py, is added. Some comments below were
+# written later and say cli.py; they mean this file.)
+#
+# What section 15 added to this file:
+#   146. Add a "Date" Feature
+#        - import time        -> a STANDARD module: comes with Python,
+#                                no install needed
+#        - time.strftime(...)  -> "string from time": the current
+#                                date/time as text, in the format you
+#                                choose with %-codes
+#        - the app now starts with:  It is Oct 12, 2026 11:42:49.
+#   151. Using Git -> this project is tracked by Git (commits) and
+#        pushed to GitHub (161).
+#
+# Files in this project:
+#   main.py          the command line app (this file, the FRONTEND)
+#   functions.py     get_todos / write_todos (the BACKEND)
+#   todos.txt        the data
+#   e1-e4_*.py       147 code experiments (glob, csv, shutil, webbrowser)
+#   weather.csv      data for e2_csv.py
+#   files/           text files for e1_glob.py and e3_shutil.py
+#   bonus/           148 bonus: JSON quiz (bonus15.py + questions.json)
+# =====================================================================
+
 # Persist the todos to disk so they survive between program runs.
 # Concepts:
 #   - open(path, mode) returns a file object.
@@ -516,7 +546,7 @@
 # Barista: the coffee isn't made at your table, that would be messy.
 # It's made in a separate prep area. Same here: get_todos and
 # write_todos were CUT from this file and PASTED into functions.py.
-#   cli.py      -> WHAT the program does (the menu loop below)
+#   main.py      -> WHAT the program does (the menu loop below)
 #   functions.py -> HOW it reads and writes the file
 #
 # After moving them, PyCharm shows "Unresolved reference 'get_todos'":
@@ -525,7 +555,7 @@
 # The fix is the IMPORT line below. It is the doorway between files:
 # "go to functions.py and bring get_todos and write_todos into this file".
 #
-# cli.py and functions.py must be in the SAME folder, otherwise:
+# main.py and functions.py must be in the SAME folder, otherwise:
 #     ModuleNotFoundError: No module named 'functions'
 #
 # Two ways to import (both work, same output):
@@ -554,14 +584,14 @@
 # 138. Code Experiments (IMPORT RUNS THE WHOLE FILE)
 #
 # Put print("hello from functions") at the bottom of functions.py and
-# run cli.py -> it prints "hello from functions". The import line ran
+# run main.py -> it prints "hello from functions". The import line ran
 # every line of functions.py.
 # Change it to print(x) -> NameError: name 'x' is not defined. The
 # traceback starts at the import line here and ends in functions.py.
 #
 # Fix for test code: put it under  if __name__ == "__main__":
 #   Run functions.py directly -> __name__ == "__main__"   -> runs
-#   cli.py imports it        -> __name__ == "functions"  -> skipped
+#   main.py imports it        -> __name__ == "functions"  -> skipped
 # See the comments at the bottom of functions.py (the experiment code
 # itself was removed in the final version).
 #
@@ -579,7 +609,7 @@
 # ---------------------------------------------------------------------
 # main (33) header: Recap of Section 14
 # ---------------------------------------------------------------------
-# Recap of Section 14. The helpers live in functions.py; cli.py imports
+# Recap of Section 14. The helpers live in functions.py; main.py imports
 # them. Two import styles work:
 #
 #     from functions import get_todos, write_todos      # named import
@@ -606,8 +636,25 @@
 import functions
 # from functions import get_todos, write_todos
 
+# ---------------------------------------------------------------------
+# 146: DATE FEATURE (Section 15)
+# ---------------------------------------------------------------------
+# Python does NOT load everything at the start. There is no time() or
+# date() you can call directly like print() or len(). The time tools
+# live in the STANDARD module `time`, so you import it first.
+# (List of all standard modules: https://docs.python.org/3/py-modindex.html)
 import time
-now = time.strftime("%b %d, %Y %H:%M:%S")
+
+# time.strftime(format) = "string from time": returns the CURRENT local
+# date and time as a string. Each %-code is replaced by a piece of it:
+#   %b  short month   "Oct"        %d  day       "12"
+#   %Y  4-digit year  "2026"       %H  hour 0-23 "11"
+#   %M  minutes       "42"         %S  seconds   "49"
+# Everything else (spaces, comma, colons) is kept as written.
+now = time.strftime("%b %d, %Y %H:%M:%S")      # "Oct 12, 2026 11:42:49"
+
+# f-string: {now} is replaced by the value of now.
+# Output:  It is Oct 12, 2026 11:42:49.
 print(f"It is {now}.")
 
 # Keep running the program repeatedly until the user chooses "exit".
