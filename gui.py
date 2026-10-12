@@ -1,3 +1,29 @@
+# Make the GUI interactive — clicking "Add" stores the typed todo in
+# todos.txt via the backend functions.
+#
+# THE EVENT LOOP
+# `window.read()` returns a tuple: (event, values)
+#   event  -> a label/identifier of what happened. For a button click,
+#             it's the button's text ("Add"). When the window's close
+#             button is clicked, it's sg.WIN_CLOSED.
+#   values -> a dict mapping each widget's KEY to its current value.
+#             So values["todo"] is whatever's typed in the input box.
+#
+# Wrap the read() call in `while True:` so the program keeps responding
+# to user actions until the user closes the window.
+#
+# WIDGET KEYS
+# Each widget that the program wants to identify needs a `key=` argument
+# so it shows up in the values dict by that name. Without it, FreeSimpleGUI
+# uses an auto-generated key.
+#
+# WIN_CLOSED HANDLING
+# Always include a `case sg.WIN_CLOSED:` branch — without it, closing
+# the window via the OS X button causes an error on the next read().
+#
+# FONT
+# Pass `font=("Helvetica", 20)` to the Window constructor to size up
+# all the widgets at once.
 # =====================================================================
 # gui.py  -  GUI FRONTEND of the todo app
 # Section 16 (156): the window, label, input box, Add button
