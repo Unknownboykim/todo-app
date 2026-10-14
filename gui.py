@@ -1,8 +1,9 @@
 # =====================================================================
-# gui.py  -  GUI FRONTEND of the todo app, SECTION 17 (final)
+# gui.py  -  GUI FRONTEND of the todo app, SECTION 18
 # 165: bigger font + the Add button works (event loop)
 # 166: list box + Edit button + update() + clicking a todo
 # 167: experiments (break vs exit(), layout in a variable)
+# 174: Complete button + Exit button
 # Backend: functions.py (get_todos, write_todos). Not changed.
 # =====================================================================
 
@@ -93,7 +94,7 @@
 #
 # For a GUI you usually want `break` so any cleanup code after the
 # loop (logging, saving state, calling window.close()) still happens.
-
+#
 # --- Experiment 2: dynamic layouts ---
 # The layout argument doesn't have to be written inline. You can build
 # it up first as a regular variable, and pass that variable in.
@@ -106,6 +107,24 @@
 #
 # This is essential when the number/contents of buttons or rows depend
 # on data you don't know ahead of time (e.g. a list of files from disk).
+
+# ---------------------------------------------------------------------
+# 174. Implement "Complete" and "Exit" Buttons
+# ---------------------------------------------------------------------
+# Add a Complete button (removes the selected todo) and an Exit button
+# (a friendlier way to close the program than the OS window-close X).
+#
+# Complete case steps:
+#   1. Read the selected todo: values["todos"][0].
+#   2. Get the full list, call list.remove(todo) to drop it, write back.
+#   3. Refresh the listbox so the deleted todo disappears immediately.
+#   4. Clear the input box too, since it might still show the old text:
+#         window["todo"].update(value="")
+#      Note: .update on a single-value widget takes `value=`,
+#      whereas .update on a Listbox takes `values=` (plural).
+#
+# Exit case: simply `break` out of the while loop. Same effect as the
+# WIN_CLOSED case — both ways to leave converge on `window.close()`.
 
 # 155: FRONTEND = what the user sees and uses (this file).
 #      BACKEND  = functions.py (reads/writes todos.txt).
@@ -130,16 +149,22 @@ add_button = sg.Button("Add")       # its label "Add" becomes the event
 list_box = sg.Listbox(values=functions.get_todos(), key="todos",
                       enable_events=True, size=(45, 10))
 edit_button = sg.Button("Edit")     # same Button TYPE, a new INSTANCE
+# 174: two more Button instances. Their labels become the events.
+complete_button = sg.Button("Complete")
+exit_button = sg.Button("Exit")
 
 # The window. layout = list of lists, each inner list = one row (157):
-#   row 1: label   row 2: input box + Add   row 3: list box + Edit (166)
+#   row 1: label   row 2: input box + Add
+#   row 3: list box + Edit (166) + Complete (174)   row 4: Exit (174)
+# One row per line, so the layout is easy to read.
 # 165: font=(family, size) makes everything bigger. One argument per
 # line keeps lines under 79 characters (recommended Python length).
 window = sg.Window("My To-Do App",
                    layout=[
                        [label],
                        [input_box, add_button],
-                       [list_box, edit_button],
+                       [list_box, edit_button, complete_button],
+                       [exit_button],
                    ],
                    font=("Helvetica", 20))
 
@@ -148,7 +173,8 @@ window = sg.Window("My To-Do App",
 while True:
     # read() shows the window and WAITS for an event. It returns a
     # tuple, split into 2 variables (like x, y = (3, 4)):
-    #   event  = what happened: "Add", "Edit", "todos" or WIN_CLOSED
+    #   event  = what happened: "Add", "Edit", "todos", "Complete",
+    #            "Exit" or WIN_CLOSED
     #   values = {"todo": text in the box, "todos": [selected item]}
     event, values = window.read()
 
@@ -189,12 +215,27 @@ while True:
             # 166: the user clicked a todo in the list box: copy it into
             # the input box. (update takes value=, singular, here)
             window["todo"].update(value=values["todos"][0])
+        case "Complete":
+            # 174: the selected todo, e.g. 'Get the car\n'.
+            # (Complete with nothing selected -> IndexError; fixed later.)
+            todo_to_complete = values["todos"][0]
+            todos = functions.get_todos()
+            # list.remove(item) deletes that item from the list,
+            # e.g. a = [1, 2, 3]; a.remove(3) -> a = [1, 2]
+            todos.remove(todo_to_complete)
+            functions.write_todos(todos)            # save to todos.txt
+            window["todos"].update(values=todos)    # list box: values= (a list)
+            # Empty the input box, which still showed the completed todo.
+            window["todo"].update(value="")         # input box: value= (one value)
+        case "Exit":
+            # 174: the Exit button closes the program the same way as
+            # the X button: leave the loop, then window.close() runs.
+            break
         case sg.WIN_CLOSED:
             # The window's X button was clicked (event = None).
             # 167: break stops ONLY the while loop; the lines after the
             # loop still run. exit() would stop the WHOLE program here.
             break
 
-# Runs after break. NOT indented (outside the loop).
-print("bye")    # only runs because we use break, not exit()
+# Runs after break (Exit or X). NOT indented (outside the loop).
 window.close()
