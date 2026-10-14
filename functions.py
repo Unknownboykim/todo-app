@@ -147,7 +147,7 @@ def write_todos(todos_arg, filepath=FILEPATH):
 #
 #     - When you run THIS file directly:   __name__ == "__main__"
 #     - When this file is imported:        __name__ == "functions"
-#
+
 # So code under the guard only runs when you click Run on functions.py.
 # The def lines above are OUTSIDE the if, so the functions still load
 # on import.
