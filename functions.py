@@ -1,10 +1,26 @@
 # =====================================================================
-# functions.py  -  Todo app BACKEND, SECTION 16 version
+# functions.py  -  Todo app BACKEND, SECTION 17 version
 # get_todos() reads todos.txt, write_todos() saves it.
 # Two frontends import this file:  import functions
 #   cli.py  -> the command line app (main.py, renamed in 156)
-#   gui.py  -> the GUI app (156)
+#   gui.py  -> the GUI app (156), working buttons in Section 17
 # =====================================================================
+
+# ---------------------------------------------------------------------
+# SECTION 17: how gui.py uses this file (the code here is NOT changed)
+# ---------------------------------------------------------------------
+# 165 Add:   todos = functions.get_todos()        read the list
+#            todos.append(values["todo"] + "\n")  add the new todo
+#            functions.write_todos(todos)         save the list
+# 166 Edit:  todos = functions.get_todos()
+#            index = todos.index(todo_to_edit)    find the old todo
+#            todos[index] = new_todo + "\n"       replace it
+#            functions.write_todos(todos)
+# 166 List box: sg.Listbox(values=functions.get_todos(), ...)
+#            the list box shows the list that get_todos() returns.
+# No argument is passed: FILEPATH ("todos.txt") is the default.
+# Each todo in the list ends with "\n" (readlines keeps it), which is why
+# the GUI adds "\n" when it writes a new or edited todo.
 
 # ---------------------------------------------------------------------
 # 155: FRONTEND vs BACKEND (Section 16)
@@ -38,7 +54,7 @@
 #   - get_todos uses  file_local  instead of  file  (no shadowing).
 #   - Single quotes 'r' and 'w' work the same as "r" and "w".
 #   - No test code at the bottom: the 138 experiment was removed.
-#     (Section 15-16 version: the __name__ == "__main__" test IS kept
+#     (Section 15-17 version: the __name__ == "__main__" test IS kept
 #     at the bottom, see the end of this file.)
 
 
