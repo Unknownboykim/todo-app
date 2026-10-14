@@ -192,6 +192,12 @@ import functions
 # 175: the STANDARD module time, for the clock (same as cli.py, 146).
 import time
 
+import os
+
+if not os.path.exists("todos.txt"):
+    with open("todos.txt", "w") as file:
+        pass  # Creates an empty file if it doesn't exist
+
 # 175: THEME. Call it BEFORE creating the widgets and the window.
 # Theme names: search "PySimpleGUI themes" (images); the same names work
 # in FreeSimpleGUI, e.g. "DarkPurple4", "Black". sg.theme_list() lists all.
