@@ -5,6 +5,7 @@
 # 167: experiments (break vs exit(), layout in a variable)
 # 174: Complete button + Exit button
 # 175: popups for errors, live clock, theme
+# 176: images as buttons (Add and Complete)
 # Backend: functions.py (get_todos, write_todos). Not changed.
 # =====================================================================
 
@@ -149,6 +150,37 @@
 #    Call sg.theme("DarkPurple4") (or any theme name — see the
 #    FreeSimpleGUI themes gallery) BEFORE creating the window.
 
+# ---------------------------------------------------------------------
+# 176. Code Experiments
+# ---------------------------------------------------------------------
+# Experiments: use IMAGES as buttons.
+#
+# Place two PNG files (e.g. add.png, edit.png) in the same folder as
+# this script — the lecture attaches them as resources.
+#
+# sg.Button arguments used here:
+#   button_text         drop the visible text label (set to empty)
+#   image_filename      path to the image to show on the button
+#   image_subsample     int divisor to shrink the image
+#   mouseover_colors    colors when the user hovers (gives feedback;
+#                       otherwise the button looks "dead")
+#   tooltip             text shown when the cursor hovers over it
+#   key                 needed because there's no text label to match
+#                       against in the match-case branch
+#
+# Because the button text is empty, the event dispatched is now the
+# button's KEY ("Add", "Edit", ...) — so the existing
+# `case "Add":` etc. branches still work.
+#
+# Notes on the code below:
+#   - The lecture resources have add.png and complete.png (no edit.png),
+#     so Add and Complete are image buttons and Edit keeps its text.
+#     The PNG files must be in the SAME folder as gui.py.
+#   - The video uses image_source="add.png" and size=2. Your version,
+#     image_filename=... + image_subsample=4, works too: image_filename
+#     is another name for the image file, image_subsample=4 shows the
+#     image 4 times smaller (good for a big PNG).
+
 # 155: FRONTEND = what the user sees and uses (this file).
 #      BACKEND  = functions.py (reads/writes todos.txt).
 
@@ -174,7 +206,18 @@ label = sg.Text("Type in a to-do")                      # a label
 # the values dictionary under that key: values["todo"].
 # (Without key=, FreeSimpleGUI uses the key 0.)
 input_box = sg.InputText(tooltip="Enter todo", key="todo")
-add_button = sg.Button("Add")       # its label "Add" becomes the event
+# 176: an IMAGE button. No label text, so key="Add" is needed: the
+# event is now the KEY (without a key the event would be "", and
+# case "Add" would never match).
+#   image_source     the image file shown on the button
+#   size=2           a narrow button (size=10 left it too wide)
+#   mouseover_colors color when the mouse is over it (without it the
+#                    button seemed to disappear on hover). Use names from
+#                    the PySimpleGUI color chart, e.g. "LightBlue2".
+#   tooltip          tells the user what the image button does
+add_button = sg.Button(size=2, image_source="add.png",
+                       mouseover_colors="LightBlue2",
+                       tooltip="Add todo", key="Add")
 
 # 166: key="todos" = the LIST BOX's ID (a DIFFERENT key from "todo").
 # values=functions.get_todos(): the list comes from todos.txt.
@@ -183,7 +226,10 @@ list_box = sg.Listbox(values=functions.get_todos(), key="todos",
                       enable_events=True, size=(45, 10))
 edit_button = sg.Button("Edit")     # same Button TYPE, a new INSTANCE
 # 174: two more Button instances. Their labels become the events.
-complete_button = sg.Button("Complete")
+# 176 exercise: the same for Complete, with complete.png.
+complete_button = sg.Button(size=2, image_source="complete.png",
+                            mouseover_colors="LightBlue2",
+                            tooltip="Complete todo", key="Complete")
 exit_button = sg.Button("Exit")
 
 # The window. layout = list of lists, each inner list = one row (157):
