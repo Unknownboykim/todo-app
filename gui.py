@@ -196,5 +196,5 @@ while True:
             break
 
 # Runs after break. NOT indented (outside the loop).
-print("bye")          # only runs because we use break, not exit()
+print("bye")    # only runs because we use break, not exit()
 window.close()
