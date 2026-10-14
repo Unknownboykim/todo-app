@@ -129,9 +129,7 @@ def write_todos(todos_arg, filepath=FILEPATH):
     # NO return: this is a PROCEDURE. It changes the file and gives
     # nothing back (Python returns None automatically).
 
-
 # Two blank lines above: style recommendation after a function.
-
 
 # 138. Code Experiments
 # (Done in the lecture, then REMOVED: the final code has nothing below
