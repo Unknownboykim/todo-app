@@ -93,7 +93,7 @@
 #
 # For a GUI you usually want `break` so any cleanup code after the
 # loop (logging, saving state, calling window.close()) still happens.
-#
+
 # --- Experiment 2: dynamic layouts ---
 # The layout argument doesn't have to be written inline. You can build
 # it up first as a regular variable, and pass that variable in.
