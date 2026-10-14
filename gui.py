@@ -4,6 +4,7 @@
 # 166: list box + Edit button + update() + clicking a todo
 # 167: experiments (break vs exit(), layout in a variable)
 # 174: Complete button + Exit button
+# 175: popups for errors, live clock, theme
 # Backend: functions.py (get_todos, write_todos). Not changed.
 # =====================================================================
 
@@ -126,6 +127,28 @@
 # Exit case: simply `break` out of the while loop. Same effect as the
 # WIN_CLOSED case — both ways to leave converge on `window.close()`.
 
+# ---------------------------------------------------------------------
+# 175. Final Touches
+# ---------------------------------------------------------------------
+# Three "finishing touches" to make the app feel polished:
+#
+# 1. ERROR HANDLING with user-friendly popups.
+#    Pressing Edit or Complete without selecting a todo raises
+#    IndexError on values["todos"][0]. Wrap each branch in try/except
+#    and show a sg.popup() instead of crashing.
+#    (Don't print() error messages — GUI users never see the console.)
+#
+# 2. LIVE CLOCK at the top of the window.
+#    - Add an empty sg.Text(key="clock") in its own first row.
+#    - Pass `window.read(timeout=200)` so the loop wakes up every
+#      200 ms even without a user event.
+#    - On every iteration, update the clock label with the current
+#      time from `time.strftime(...)`.
+#
+# 3. THEME + sizing.
+#    Call sg.theme("DarkPurple4") (or any theme name — see the
+#    FreeSimpleGUI themes gallery) BEFORE creating the window.
+
 # 155: FRONTEND = what the user sees and uses (this file).
 #      BACKEND  = functions.py (reads/writes todos.txt).
 
@@ -134,8 +157,18 @@
 import FreeSimpleGUI as sg
 # The backend: get_todos() and write_todos() (same ones cli.py uses).
 import functions
+# 175: the STANDARD module time, for the clock (same as cli.py, 146).
+import time
 
+# 175: THEME. Call it BEFORE creating the widgets and the window.
+# Theme names: search "PySimpleGUI themes" (images); the same names work
+# in FreeSimpleGUI, e.g. "DarkPurple4", "Black". sg.theme_list() lists all.
+sg.theme("DarkPurple4")
 
+# 175: an empty label for the clock, in its own first row. Not called
+# "time", because that is the name of the module we imported.
+# key="clock" so the loop can find and update it.
+clock = sg.Text("", key="clock")
 label = sg.Text("Type in a to-do")                      # a label
 # 165: key="todo" is the ID of this box. Its typed text appears in
 # the values dictionary under that key: values["todo"].
@@ -154,13 +187,14 @@ complete_button = sg.Button("Complete")
 exit_button = sg.Button("Exit")
 
 # The window. layout = list of lists, each inner list = one row (157):
-#   row 1: label   row 2: input box + Add
+#   row 0: clock (175)   row 1: label   row 2: input box + Add
 #   row 3: list box + Edit (166) + Complete (174)   row 4: Exit (174)
 # One row per line, so the layout is easy to read.
 # 165: font=(family, size) makes everything bigger. One argument per
 # line keeps lines under 79 characters (recommended Python length).
 window = sg.Window("My To-Do App",
                    layout=[
+                       [clock],                     # 175: the clock row
                        [label],
                        [input_box, add_button],
                        [list_box, edit_button, complete_button],
@@ -174,9 +208,16 @@ while True:
     # read() shows the window and WAITS for an event. It returns a
     # tuple, split into 2 variables (like x, y = (3, 4)):
     #   event  = what happened: "Add", "Edit", "todos", "Complete",
-    #            "Exit" or WIN_CLOSED
+    #            "Exit", WIN_CLOSED, or "__TIMEOUT__" (175)
     #   values = {"todo": text in the box, "todos": [selected item]}
-    event, values = window.read()
+    #
+    # 175: timeout=200 -> read() also returns every 200 milliseconds
+    # (event "__TIMEOUT__") even when the user does nothing. Without it,
+    # the loop only runs after a click, so the clock would not tick.
+    # 1000 ms = 1 second; 10 also works but runs the loop very often.
+    event, values = window.read(timeout=200)
+    # 175: on EVERY loop run, put the current date and time in the clock.
+    window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
 
     # match checks which event happened: one case per button.
     match event:
@@ -193,40 +234,53 @@ while True:
             # 166: refresh the list box so the new todo shows right away.
             window["todos"].update(values=todos)
         case "Edit":
-            # 166: the selected todo. values["todos"] is a LIST, e.g.
-            # ['Clean the code\n'], so [0] gives the string.
-            # (Edit with nothing selected -> IndexError; fixed later.)
-            todo_to_edit = values["todos"][0]
-            # The new text from the input box. .strip("\n") removes the
-            # line break that comes along when a todo is copied in from
-            # the list box, so "+ \n" below never makes a blank line.
-            new_todo = values["todo"].strip("\n")
+            # 175: try/except. Edit with nothing selected -> values["todos"]
+            # is [] -> [0] raises IndexError. Show a popup instead of crashing.
+            try:
+                # 166: the selected todo. values["todos"] is a LIST, e.g.
+                # ['Clean the code\n'], so [0] gives the string.
+                todo_to_edit = values["todos"][0]
+                # The new text from the input box. .strip("\n") removes the
+                # line break that comes along when a todo is copied in from
+                # the list box, so "+ \n" below never makes a blank line.
+                new_todo = values["todo"].strip("\n")
 
-            todos = functions.get_todos()
-            # Find WHERE the old todo is (its index) and replace it.
-            index = todos.index(todo_to_edit)
-            todos[index] = new_todo + "\n"
-            functions.write_todos(todos)
+                todos = functions.get_todos()
+                # Find WHERE the old todo is (its index) and replace it.
+                index = todos.index(todo_to_edit)
+                todos[index] = new_todo + "\n"
+                functions.write_todos(todos)
 
-            # window["todos"] = the list box inside the window.
-            # .update(values=...) shows the new list in REAL TIME.
-            window["todos"].update(values=todos)
+                # window["todos"] = the list box inside the window.
+                # .update(values=...) shows the new list in REAL TIME.
+                window["todos"].update(values=todos)
+            except IndexError:
+                # GUI users never see the command line, so no print():
+                # sg.popup() opens a small window with the message and OK.
+                # font= works like the Window font argument.
+                sg.popup("Please select an item first.", font=("Helvetica", 20))
         case "todos":
             # 166: the user clicked a todo in the list box: copy it into
             # the input box. (update takes value=, singular, here)
-            window["todo"].update(value=values["todos"][0])
+            # if: only when something IS selected (an empty selection
+            # would give IndexError, e.g. after the list was refreshed).
+            if values["todos"]:
+                window["todo"].update(value=values["todos"][0])
         case "Complete":
-            # 174: the selected todo, e.g. 'Get the car\n'.
-            # (Complete with nothing selected -> IndexError; fixed later.)
-            todo_to_complete = values["todos"][0]
-            todos = functions.get_todos()
-            # list.remove(item) deletes that item from the list,
-            # e.g. a = [1, 2, 3]; a.remove(3) -> a = [1, 2]
-            todos.remove(todo_to_complete)
-            functions.write_todos(todos)            # save to todos.txt
-            window["todos"].update(values=todos)    # list box: values= (a list)
-            # Empty the input box, which still showed the completed todo.
-            window["todo"].update(value="")         # input box: value= (one value)
+            # 175: same try/except as Edit.
+            try:
+                # 174: the selected todo, e.g. 'Get the car\n'.
+                todo_to_complete = values["todos"][0]
+                todos = functions.get_todos()
+                # list.remove(item) deletes that item from the list,
+                # e.g. a = [1, 2, 3]; a.remove(3) -> a = [1, 2]
+                todos.remove(todo_to_complete)
+                functions.write_todos(todos)            # save to todos.txt
+                window["todos"].update(values=todos)    # list box: values= (a list)
+                # Empty the input box, which still showed the completed todo.
+                window["todo"].update(value="")         # input box: value= (one value)
+            except IndexError:
+                sg.popup("Please select an item first.", font=("Helvetica", 20))
         case "Exit":
             # 174: the Exit button closes the program the same way as
             # the X button: leave the loop, then window.close() runs.
