@@ -1,10 +1,40 @@
 # =====================================================================
-# functions.py  -  Todo app BACKEND, SECTION 17 version
+# functions.py  -  Todo app BACKEND, SECTION 18 version
 # get_todos() reads todos.txt, write_todos() saves it.
 # Two frontends import this file:  import functions
 #   cli.py  -> the command line app (main.py, renamed in 156)
-#   gui.py  -> the GUI app (156), working buttons in Section 17
+#   gui.py  -> the GUI app (156), working buttons in Section 17,
+#              Complete/Exit, popups, clock and gui.exe in Section 18
 # =====================================================================
+
+# ---------------------------------------------------------------------
+# SECTION 18: how gui.py uses this file (the code here is NOT changed)
+# ---------------------------------------------------------------------
+# 174 Complete: todos = functions.get_todos()     read the list
+#               todos.remove(todo_to_complete)    delete the selected todo
+#               functions.write_todos(todos)      save the list
+# 174 Exit:     does not use this file (only break).
+# 175 Popups, clock, theme: only gui.py changes. If nothing is selected,
+#               the IndexError happens in gui.py (values["todos"][0])
+#               BEFORE get_todos() is called, so this file never sees it.
+# 176 Image buttons: only gui.py changes.
+# 177 Bonus (zip extractor): uses zip_extractor.py, not this file.
+#
+# 180 Standalone executable (gui.exe):
+#   - If todos.txt does NOT exist, open(filepath, 'r') in get_todos()
+#     crashes with FileNotFoundError ("No such file or directory in
+#     functions.py", line 47 of the 180 transcript).
+#   - The fix is in gui.py, NOT here: gui.py runs
+#         if not os.path.exists("todos.txt"):
+#             with open("todos.txt", "w") as file:
+#                 pass
+#     BEFORE it calls functions.get_todos(), so the file always exists.
+#   - PyInstaller packs this file INTO gui.exe automatically, because
+#     gui.py has  import functions . You don't give functions.py to users.
+#   - FILEPATH = "todos.txt" is a RELATIVE path: gui.exe reads and writes
+#     todos.txt in the folder where gui.exe runs (the dist folder).
+#   - The __name__ == "__main__" test at the bottom does NOT run inside
+#     gui.exe, because there this file is IMPORTED (__name__ == "functions").
 
 # ---------------------------------------------------------------------
 # SECTION 17: how gui.py uses this file (the code here is NOT changed)
@@ -54,7 +84,7 @@
 #   - get_todos uses  file_local  instead of  file  (no shadowing).
 #   - Single quotes 'r' and 'w' work the same as "r" and "w".
 #   - No test code at the bottom: the 138 experiment was removed.
-#     (Section 15-17 version: the __name__ == "__main__" test IS kept
+#     (Section 15-18 version: the __name__ == "__main__" test IS kept
 #     at the bottom, see the end of this file.)
 
 
